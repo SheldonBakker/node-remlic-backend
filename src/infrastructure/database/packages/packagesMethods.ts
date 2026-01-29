@@ -25,14 +25,14 @@ export default class PackagesService {
       query = query.eq('type', filters.type);
     }
 
+    if (cursor) {
+      query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
+    }
+
     query = query
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(params.limit);
-
-    if (cursor) {
-      query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
-    }
 
     const { data, error } = await query;
 

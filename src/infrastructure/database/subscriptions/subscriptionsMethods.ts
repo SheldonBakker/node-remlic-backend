@@ -33,14 +33,14 @@ export default class SubscriptionsService {
       query = query.eq('profile_id', filters.profile_id);
     }
 
+    if (cursor) {
+      query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
+    }
+
     query = query
       .order('created_at', { ascending: false })
       .order('id', { ascending: false })
       .limit(params.limit);
-
-    if (cursor) {
-      query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
-    }
 
     const { data, error } = await query;
 
@@ -79,14 +79,16 @@ export default class SubscriptionsService {
     let query = supabaseAdmin
       .from('app_subscriptions')
       .select('*, app_packages(*, app_permissions(*))')
-      .eq('profile_id', userId)
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(params.limit);
+      .eq('profile_id', userId);
 
     if (cursor) {
       query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
     }
+
+    query = query
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(params.limit);
 
     const { data, error } = await query;
 

@@ -14,14 +14,16 @@ export default class PermissionsService {
 
     let query = supabaseAdmin
       .from('app_permissions')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(params.limit);
+      .select('*');
 
     if (cursor) {
       query = query.or(`created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${cursor.id})`);
     }
+
+    query = query
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(params.limit);
 
     const { data, error } = await query;
 
