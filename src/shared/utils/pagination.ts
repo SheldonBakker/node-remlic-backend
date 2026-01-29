@@ -15,7 +15,7 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 
 const cursorSchema = z.object({
-  created_at: z.string().datetime(),
+  created_at: z.string().datetime({ offset: true }),
   id: z.string().uuid(),
 });
 
