@@ -1,8 +1,5 @@
 export interface IPagination {
-  nextCursor?: {
-    created_at: string;
-    id: string;
-  } | null;
+  nextCursor?: string | null;
 }
 
 export interface IApiResponse<T> {

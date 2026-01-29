@@ -1,4 +1,11 @@
-import type { IDriverLicence, ICreateDriverLicenceData, IUpdateDriverLicenceData, IDriverLicenceFilters } from './types.js';
+import type {
+  IDriverLicence,
+  ICreateDriverLicenceData,
+  IUpdateDriverLicenceData,
+  IDriverLicenceFilters,
+  ICreateDriverLicenceFromDecodeData,
+  IUpdateDriverLicenceFromDecodeData,
+} from './types.js';
 import { supabaseAdmin } from '../supabaseClient.js';
 import { HttpError } from '../../../shared/types/errors/appError.js';
 import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
@@ -6,7 +13,84 @@ import { Logger } from '../../../shared/utils/logger.js';
 import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
 import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
 
+interface FindByIdNumberResult {
+  licence: IDriverLicence | null;
+}
+
 export default class DriverLicenceService {
+  public static async findByIdNumber(
+    userId: string,
+    idNumber: string,
+  ): Promise<FindByIdNumberResult> {
+    const { data, error } = await supabaseAdmin
+      .from('driver_licences')
+      .select('*')
+      .eq('profile_id', userId)
+      .eq('id_number', idNumber)
+      .maybeSingle();
+
+    if (error) {
+      Logger.error('Failed to find driver licence by ID number', 'DRIVER_LICENCE_SERVICE', { error: error.message });
+      throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to check existing driver licence');
+    }
+
+    return { licence: data as IDriverLicence | null };
+  }
+
+  public static async createFromDecode(data: ICreateDriverLicenceFromDecodeData): Promise<IDriverLicence> {
+    const { data: licence, error } = await supabaseAdmin
+      .from('driver_licences')
+      .insert({
+        profile_id: data.profile_id,
+        surname: data.surname,
+        initials: data.initials,
+        id_number: data.id_number,
+        expiry_date: data.expiry_date,
+        licence_number: data.licence_number,
+        licence_codes: data.licence_codes,
+        issue_date: data.issue_date,
+        date_of_birth: data.date_of_birth,
+        gender: data.gender,
+        decoded_data: data.decoded_data,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      Logger.error('Failed to create driver licence from decode', 'DRIVER_LICENCE_SERVICE', { error: error.message });
+      throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create driver licence');
+    }
+
+    return licence as IDriverLicence;
+  }
+
+  public static async updateFromDecode(data: IUpdateDriverLicenceFromDecodeData): Promise<IDriverLicence> {
+    const { data: licence, error } = await supabaseAdmin
+      .from('driver_licences')
+      .update({
+        surname: data.surname,
+        initials: data.initials,
+        expiry_date: data.expiry_date,
+        licence_number: data.licence_number,
+        licence_codes: data.licence_codes,
+        issue_date: data.issue_date,
+        date_of_birth: data.date_of_birth,
+        gender: data.gender,
+        decoded_data: data.decoded_data,
+      })
+      .eq('id', data.id)
+      .eq('profile_id', data.profile_id)
+      .select()
+      .single();
+
+    if (error) {
+      Logger.error('Failed to update driver licence from decode', 'DRIVER_LICENCE_SERVICE', { error: error.message });
+      throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update driver licence');
+    }
+
+    return licence as IDriverLicence;
+  }
+
   public static async getDriverLicencesByUserId(
     userId: string,
     params: ICursorParams,

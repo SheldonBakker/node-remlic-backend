@@ -1,11 +1,9 @@
 import { z } from 'zod';
 import { dateSchema, createUuidSchema } from '../../../shared/schemas/common.js';
 import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
-import type {
-  ICreateDriverLicenceRequest,
-  IUpdateDriverLicenceRequest,
-  IDriverLicenceFilters,
-} from './types.js';
+import { EXPECTED_BARCODE_LENGTH } from '../../../shared/utils/sadl/sadlConstants.js';
+import type { IDecodeDriverLicenceRequest } from '../../../shared/utils/sadl/sadlTypes.js';
+import type { ICreateDriverLicenceRequest, IUpdateDriverLicenceRequest, IDriverLicenceFilters } from './types.js';
 
 const surnameSchema = z
   .string()
@@ -52,6 +50,25 @@ const filtersSchema = z.object({
 
 const driverLicenceIdSchema = createUuidSchema('driver licence');
 
+const decodeDriverLicenceSchema = z.object({
+  barcode_data: z
+    .string()
+    .min(1, 'Barcode data is required')
+    .refine(
+      (data) => {
+        try {
+          const decoded = Buffer.from(data, 'base64');
+          return decoded.length === EXPECTED_BARCODE_LENGTH;
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: `Barcode data must be valid base64 encoding ${EXPECTED_BARCODE_LENGTH} bytes`,
+      },
+    ),
+});
+
 export class DriverLicenceValidation {
   static validateCreateDriverLicence(data: unknown): ICreateDriverLicenceRequest {
     return validateOrThrow(createDriverLicenceSchema, data);
@@ -67,5 +84,9 @@ export class DriverLicenceValidation {
 
   static validateDriverLicenceId(id: unknown): string {
     return validateIdOrThrow(driverLicenceIdSchema, id, 'Invalid driver licence ID format');
+  }
+
+  static validateDecodeRequest(data: unknown): IDecodeDriverLicenceRequest {
+    return validateOrThrow(decodeDriverLicenceSchema, data);
   }
 }

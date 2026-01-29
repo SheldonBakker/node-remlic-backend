@@ -64,10 +64,7 @@ export class PaginationUtil {
     }
 
     return {
-      nextCursor: {
-        created_at: lastItem.created_at,
-        id: lastItem.id,
-      },
+      nextCursor: this.encodeCursor(lastItem.created_at, lastItem.id),
     };
   }
 }
