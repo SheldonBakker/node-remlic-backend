@@ -22,7 +22,7 @@ export function createCloudTransport(): winston.transport | null {
   resolveProjectId();
 
   const transport = new LoggingWinston({
-    logName: 'winston_log',
+    logName: 'remlic_logs',
   });
 
   transport.on('error', (err: Error) => {
