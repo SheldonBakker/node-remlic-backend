@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { log } from '../../shared/utils/logging/logger.js';
+import { log, getTraceMeta } from '../../shared/utils/logging/logger.js';
 import { config } from '../../infrastructure/config/env.config.js';
 
 const SENSITIVE_PARAMS = ['token', 'key', 'secret', 'password', 'reset'];
@@ -42,14 +42,17 @@ export function httpLoggerMiddleware(req: Request, res: Response, next: NextFunc
     const { user } = req as Request & { user?: { id?: string } };
 
     log('info', 'HTTP request', {
-      method: req.method,
-      url: sanitizeUrl(req),
-      status: res.statusCode,
-      responseTime: `${responseTime}ms`,
-      contentLength: res.getHeader('content-length') ?? 0,
+      httpRequest: {
+        requestMethod: req.method,
+        requestUrl: sanitizeUrl(req),
+        status: res.statusCode,
+        latency: `${responseTime / 1000}s`,
+        responseSize: Number(res.getHeader('content-length') ?? 0),
+        userAgent: req.headers['user-agent'] ?? '',
+        remoteIp: getClientIp(req),
+      },
       userId: user?.id ?? 'anonymous',
-      remoteAddr: getClientIp(req),
-      userAgent: req.headers['user-agent'],
+      ...getTraceMeta(req),
     });
   });
 
