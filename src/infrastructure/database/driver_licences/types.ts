@@ -1,4 +1,4 @@
-import type { IPagination } from '../../../shared/types/apiResponse.js';
+import type { IPagination } from '../../../shared/types/apiResponse';
 
 export interface IDriverLicence {
   id: string;

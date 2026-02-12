@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop, complexity */
-import type { IJobResult, IJobError } from '../types.js';
-import { CronService } from '../cronService.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import PsiraService from '../../infrastructure/database/psira/psiraMethods.js';
-import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods.js';
+import type { IJobResult, IJobError } from '../types';
+import { CronService } from '../cronService';
+import Logger from '../../shared/utils/logger';
+import PsiraService from '../../infrastructure/database/psira/psiraMethods';
+import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods';
 
 const JOB_NAME = 'psira-update';
 const SCHEDULE = '0 3 * * *';
@@ -40,7 +40,7 @@ async function run(): Promise<IJobResult> {
         const apiResults = await PsiraService.getApplicantDetailsBySiraNo(officer.sira_no);
 
         if (apiResults.length === 0 || !apiResults[0]) {
-          Logger.warn(`No API results for SIRA No: ${officer.sira_no}`, JOB_NAME);
+          Logger.warn(JOB_NAME, `No API results for SIRA No: ${officer.sira_no}`);
           continue;
         }
 
@@ -56,7 +56,7 @@ async function run(): Promise<IJobResult> {
         }
       } catch (error) {
         errors.push({ recordId: officer.id, message: error instanceof Error ? error.message : 'Unknown error' });
-        Logger.error(`Failed to update officer ${officer.sira_no}`, JOB_NAME, { error });
+        Logger.error(JOB_NAME, `Failed to update officer ${officer.sira_no}`, error);
       }
 
       if (recordsProcessed < eligibleOfficers.length) {
@@ -66,7 +66,7 @@ async function run(): Promise<IJobResult> {
 
     return { jobName: JOB_NAME, startTime, endTime: new Date(), success: errors.length === 0, recordsProcessed, recordsUpdated, errors };
   } catch (error) {
-    Logger.error('PSIRA update job failed', JOB_NAME, { error });
+    Logger.error(JOB_NAME, 'PSIRA update job failed', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return {
       jobName: JOB_NAME, startTime, endTime: new Date(), success: false,

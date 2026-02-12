@@ -1,5 +1,5 @@
-import type { EntityType } from '../../infrastructure/database/reminders/types.js';
-import type { SubscriptionFeature } from '../../api/middleware/subscriptionRouteConfig.js';
+import type { EntityType } from '../../infrastructure/database/reminders/types';
+import type { SubscriptionFeature } from '../../api/middleware/subscriptionRouteConfig';
 
 export const ENTITY_TYPES: EntityType[] = ['firearms', 'vehicles', 'certificates', 'psira_officers', 'driver_licences'];
 

@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import CertificatesController from '../controllers/certificatesController.js';
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
-import { requireRouteSubscription } from '../middleware/subscriptionMiddleware.js';
+import CertificatesController from '../controllers/certificatesController';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
+import { requireRouteSubscription } from '../middleware/subscriptionMiddleware';
 
 const requireSubscription = requireRouteSubscription('/certificates');
 

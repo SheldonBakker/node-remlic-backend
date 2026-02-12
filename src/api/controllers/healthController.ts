@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
 
 interface IHealthResponse {
   status: 'healthy' | 'unhealthy';

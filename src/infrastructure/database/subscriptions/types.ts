@@ -1,4 +1,4 @@
-import type { IPackageWithPermission } from '../packages/types.js';
+import type { IPackageWithPermission } from '../packages/types';
 
 export type SubscriptionStatus = 'active' | 'expired' | 'cancelled' | 'refunded';
 

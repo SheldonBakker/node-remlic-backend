@@ -1,10 +1,6 @@
 import path from 'path';
-import { fileURLToPath } from 'url';
 import swaggerJsdoc from 'swagger-jsdoc';
-import { config } from './env.config.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { config } from './env.config';
 
 const swaggerOptions = {
   definition: {

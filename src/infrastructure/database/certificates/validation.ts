@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { ICreateCertificateRequest, IUpdateCertificateRequest, ICertificatesFilters } from './types.js';
-import { dateSchema, createUuidSchema, sortOrderSchema, withAtLeastOneField } from '../../../shared/schemas/common.js';
-import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { ICreateCertificateRequest, IUpdateCertificateRequest, ICertificatesFilters } from './types';
+import { dateSchema, createUuidSchema, sortOrderSchema, withAtLeastOneField } from '../../../shared/schemas/common';
+import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper';
 
 const createCertificateSchema = z.object({
   type: z.string()

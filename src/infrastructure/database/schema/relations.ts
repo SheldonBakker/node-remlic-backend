@@ -10,7 +10,7 @@ import {
   appPackages,
   appSubscriptions,
   reminderSettings,
-} from './tables.js';
+} from './tables';
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
   firearms: many(firearms),

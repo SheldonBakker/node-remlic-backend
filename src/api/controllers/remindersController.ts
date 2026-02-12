@@ -1,10 +1,10 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import RemindersService from '../../infrastructure/database/reminders/remindersMethods.js';
-import { RemindersValidation } from '../../infrastructure/database/reminders/validation.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { HttpError } from '../../shared/types/errors/appError';
+import RemindersService from '../../infrastructure/database/reminders/remindersMethods';
+import { RemindersValidation } from '../../infrastructure/database/reminders/validation';
 
 export default class RemindersController {
   public static getReminderSettings = async (

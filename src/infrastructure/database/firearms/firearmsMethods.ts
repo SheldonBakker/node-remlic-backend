@@ -1,14 +1,16 @@
-import type { IFirearm, ICreateFirearmData, IUpdateFirearmData, IFirearmsFilters } from './types.js';
-import db from '../drizzleClient.js';
-import { firearms } from '../schema/index.js';
+import type { IFirearm, ICreateFirearmData, IUpdateFirearmData, IFirearmsFilters } from './types';
+import db from '../drizzleClient';
+import { firearms } from '../schema/index';
 import { eq, or, lt, and, desc, asc, ilike, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class FirearmsService {
+  private static readonly CONTEXT = 'FIREARMS_SERVICE';
+
   public static async getFirearmsByUserId(
     userId: string,
     params: ICursorParams,
@@ -55,7 +57,7 @@ export default class FirearmsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch firearms', 'FIREARMS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch firearms', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch firearms');
     }
   }
@@ -68,7 +70,7 @@ export default class FirearmsService {
         .where(and(eq(firearms.id, firearmId), eq(firearms.profile_id, userId)));
 
       if (!data) {
-        Logger.warn('Firearm not found', 'FIREARMS_SERVICE', { firearmId, userId });
+        Logger.warn(this.CONTEXT, `Firearm not found (firearmId: ${firearmId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Firearm not found');
       }
 
@@ -77,7 +79,7 @@ export default class FirearmsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch firearm', 'FIREARMS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch firearm', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch firearm');
     }
   }
@@ -110,7 +112,7 @@ export default class FirearmsService {
       if (cause?.code === '23505' || (error as Record<string, unknown>).code === '23505') {
         throw new HttpError(HTTP_STATUS.CONFLICT, 'A firearm with this serial number already exists');
       }
-      Logger.error('Failed to create firearm', 'FIREARMS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create firearm', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create firearm');
     }
   }
@@ -123,7 +125,7 @@ export default class FirearmsService {
         .where(and(eq(firearms.id, data.id), eq(firearms.profile_id, data.profile_id)));
 
       if (!existing) {
-        Logger.warn('Firearm not found for update', 'FIREARMS_SERVICE', { firearmId: data.id, userId: data.profile_id });
+        Logger.warn(this.CONTEXT, `Firearm not found for update (firearmId: ${data.id})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Firearm not found');
       }
 
@@ -148,7 +150,7 @@ export default class FirearmsService {
       if (cause?.code === '23505' || (error as Record<string, unknown>).code === '23505') {
         throw new HttpError(HTTP_STATUS.CONFLICT, 'A firearm with this serial number already exists');
       }
-      Logger.error('Failed to update firearm', 'FIREARMS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update firearm', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update firearm');
     }
   }
@@ -161,7 +163,7 @@ export default class FirearmsService {
         .where(and(eq(firearms.id, firearmId), eq(firearms.profile_id, userId)));
 
       if (!existing) {
-        Logger.warn('Firearm not found for deletion', 'FIREARMS_SERVICE', { firearmId, userId });
+        Logger.warn(this.CONTEXT, `Firearm not found for deletion (firearmId: ${firearmId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Firearm not found');
       }
 
@@ -172,7 +174,7 @@ export default class FirearmsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete firearm', 'FIREARMS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete firearm', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete firearm');
     }
   }

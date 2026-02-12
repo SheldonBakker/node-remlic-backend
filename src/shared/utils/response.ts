@@ -1,5 +1,5 @@
 import type { Response } from 'express';
-import type { IApiResponse, IApiErrorResponse, IPagination } from '../types/apiResponse.js';
+import type { IApiResponse, IApiErrorResponse, IPagination } from '../types/apiResponse';
 
 export class ResponseUtil {
   public static success<T>(

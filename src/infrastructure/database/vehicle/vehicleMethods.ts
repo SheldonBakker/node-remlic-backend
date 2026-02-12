@@ -1,14 +1,16 @@
-import type { IVehicle, ICreateVehicleData, IUpdateVehicleData, IVehicleFilters } from './types.js';
-import db from '../drizzleClient.js';
-import { vehicles } from '../schema/index.js';
+import type { IVehicle, ICreateVehicleData, IUpdateVehicleData, IVehicleFilters } from './types';
+import db from '../drizzleClient';
+import { vehicles } from '../schema/index';
 import { eq, or, lt, and, desc, asc, inArray, sql, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class VehicleService {
+  private static readonly CONTEXT = 'VEHICLE_SERVICE';
+
   public static async getVehiclesByUserId(
     userId: string,
     params: ICursorParams,
@@ -67,7 +69,7 @@ export default class VehicleService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch vehicles', 'VEHICLE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch vehicles', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch vehicles');
     }
   }
@@ -80,7 +82,7 @@ export default class VehicleService {
         .where(and(eq(vehicles.id, vehicleId), eq(vehicles.profile_id, userId)));
 
       if (!data) {
-        Logger.warn('Vehicle not found', 'VEHICLE_SERVICE', { vehicleId, userId });
+        Logger.warn(this.CONTEXT, `Vehicle not found (vehicleId: ${vehicleId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Vehicle not found');
       }
 
@@ -89,7 +91,7 @@ export default class VehicleService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch vehicle', 'VEHICLE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch vehicle', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch vehicle');
     }
   }
@@ -118,7 +120,7 @@ export default class VehicleService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create vehicle', 'VEHICLE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create vehicle', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create vehicle');
     }
   }
@@ -131,7 +133,7 @@ export default class VehicleService {
         .where(and(eq(vehicles.id, data.id), eq(vehicles.profile_id, data.profile_id)));
 
       if (!existing) {
-        Logger.warn('Vehicle not found for update', 'VEHICLE_SERVICE', { vehicleId: data.id, userId: data.profile_id });
+        Logger.warn(this.CONTEXT, `Vehicle not found for update (vehicleId: ${data.id})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Vehicle not found');
       }
 
@@ -152,7 +154,7 @@ export default class VehicleService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to update vehicle', 'VEHICLE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update vehicle', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update vehicle');
     }
   }
@@ -165,7 +167,7 @@ export default class VehicleService {
         .where(and(eq(vehicles.id, vehicleId), eq(vehicles.profile_id, userId)));
 
       if (!existing) {
-        Logger.warn('Vehicle not found for deletion', 'VEHICLE_SERVICE', { vehicleId, userId });
+        Logger.warn(this.CONTEXT, `Vehicle not found for deletion (vehicleId: ${vehicleId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Vehicle not found');
       }
 
@@ -176,7 +178,7 @@ export default class VehicleService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete vehicle', 'VEHICLE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete vehicle', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete vehicle');
     }
   }

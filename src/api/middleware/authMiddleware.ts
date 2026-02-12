@@ -1,11 +1,13 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { UserRole } from '../../shared/types/auth.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import Logger from '../../shared/utils/logger';
+import { ResponseUtil } from '../../shared/utils/response';
+import { UserRole } from '../../shared/types/auth';
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from 'jose';
-import { config } from '../../infrastructure/config/env.config.js';
+import { config } from '../../infrastructure/config/env.config';
+
+const CONTEXT = 'AUTH_MIDDLEWARE';
 
 export { UserRole };
 
@@ -50,10 +52,8 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
           audience: 'authenticated',
         });
         payload = result.payload as SupabaseJwtPayload;
-      } catch (jwtError) {
-        Logger.warn('JWT verification failed', 'AUTH_MIDDLEWARE', {
-          error: (jwtError as Error).message,
-        });
+      } catch {
+        Logger.warn(CONTEXT, 'JWT verification failed');
         ResponseUtil.error(res, 'Invalid token', HTTP_STATUS.UNAUTHORIZED);
         return;
       }
@@ -73,18 +73,14 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
       }
 
       if (!isValidRole(appRole) || !allowedRoles.includes(appRole)) {
-        Logger.warn('Access denied - insufficient role', 'AUTH_MIDDLEWARE', {
-          userId: req.user.id,
-          userRole: appRole,
-          requiredRoles: allowedRoles,
-        });
+        Logger.warn(CONTEXT, `Access denied - insufficient role (userId: ${req.user.id})`);
         ResponseUtil.error(res, 'You do not have permission to access this resource', HTTP_STATUS.FORBIDDEN);
         return;
       }
 
       next();
     } catch (error) {
-      Logger.error('JWT verification failed', 'AUTH_MIDDLEWARE', { error });
+      Logger.error(CONTEXT, 'JWT verification failed', error);
       ResponseUtil.error(res, 'Authentication failed', HTTP_STATUS.UNAUTHORIZED);
     }
   };

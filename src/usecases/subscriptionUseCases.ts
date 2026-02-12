@@ -1,20 +1,20 @@
 import { randomUUID } from 'crypto';
-import SubscriptionsService from '../infrastructure/database/subscriptions/subscriptionsMethods.js';
-import PackagesService from '../infrastructure/database/packages/packagesMethods.js';
+import SubscriptionsService from '../infrastructure/database/subscriptions/subscriptionsMethods';
+import PackagesService from '../infrastructure/database/packages/packagesMethods';
 import type {
   IInitializeSubscriptionRequest,
   IInitializeSubscriptionResponse,
   IChangePlanRequest,
   ISubscriptionWithPackage,
-} from '../infrastructure/database/subscriptions/types.js';
-import { HttpError } from '../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../shared/constants/httpStatus.js';
-import { Logger } from '../shared/utils/logging/logger.js';
-import db from '../infrastructure/database/drizzleClient.js';
-import { profiles } from '../infrastructure/database/schema/index.js';
+} from '../infrastructure/database/subscriptions/types';
+import { HttpError } from '../shared/types/errors/appError';
+import { HTTP_STATUS } from '../shared/constants/httpStatus';
+import Logger from '../shared/utils/logger';
+import db from '../infrastructure/database/drizzleClient';
+import { profiles } from '../infrastructure/database/schema/index';
 import { eq } from 'drizzle-orm';
-import { PaystackService } from '../infrastructure/payment/paystackService.js';
-import type { IPaystackWebhookPayload } from '../infrastructure/payment/types.js';
+import { PaystackService } from '../infrastructure/payment/paystackService';
+import type { IPaystackWebhookPayload } from '../infrastructure/payment/types';
 
 interface ISubscriptionMetadata {
   user_id?: string;
@@ -31,7 +31,7 @@ export class SubscriptionUseCases {
       const isFreeTrial = existingSubscription.app_packages.slug === 'free-trial';
       if (isFreeTrial) {
         await SubscriptionsService.cancelSubscription(existingSubscription.id);
-        Logger.info(`Auto-cancelled free trial for user ${userId} upgrading to paid plan`, 'SUBSCRIPTION_USE_CASES');
+        Logger.info('SUBSCRIPTION_USE_CASES', `Auto-cancelled free trial for user ${userId} upgrading to paid plan`);
       } else {
         if (existingSubscription.package_id === request.package_id) {
           throw new HttpError(HTTP_STATUS.CONFLICT, 'You already have an active subscription to this package');
@@ -103,7 +103,7 @@ export class SubscriptionUseCases {
         break;
 
       case 'invoice.payment_failed':
-        Logger.warn(`Payment failed for subscription: ${data.subscription_code}`, 'SUBSCRIPTION_USE_CASES');
+        Logger.warn('SUBSCRIPTION_USE_CASES', `Payment failed for subscription: ${data.subscription_code}`);
         break;
 
       default:
@@ -146,7 +146,7 @@ export class SubscriptionUseCases {
       if (subscriptionResult.success && subscriptionResult.data) {
         emailToken = subscriptionResult.data.email_token;
       } else {
-        Logger.warn(`Failed to fetch email_token from Paystack: ${subscriptionResult.error}`, 'SUBSCRIPTION_USE_CASES');
+        Logger.warn('SUBSCRIPTION_USE_CASES', `Failed to fetch email_token from Paystack: ${subscriptionResult.error}`);
       }
     }
 
@@ -164,7 +164,7 @@ export class SubscriptionUseCases {
   private static async renewExistingSubscription(subscriptionCode: string): Promise<void> {
     const subscription = await SubscriptionsService.getByPaystackCode(subscriptionCode);
     if (!subscription) {
-      Logger.warn(`Subscription not found: ${subscriptionCode}`, 'SUBSCRIPTION_USE_CASES');
+      Logger.warn('SUBSCRIPTION_USE_CASES', `Subscription not found: ${subscriptionCode}`);
       return;
     }
 
@@ -213,11 +213,11 @@ export class SubscriptionUseCases {
         );
 
         if (!result.success) {
-          Logger.error(`Paystack cancellation failed: ${result.error}`, 'SUBSCRIPTION_USE_CASES');
+          Logger.error('SUBSCRIPTION_USE_CASES', `Paystack cancellation failed: ${result.error}`);
           throw new HttpError(HTTP_STATUS.BAD_GATEWAY, 'Failed to cancel with payment provider');
         }
       } else {
-        Logger.warn(`Cannot cancel on Paystack: missing email_token for ${subscription.paystack_subscription_code}`, 'SUBSCRIPTION_USE_CASES');
+        Logger.warn('SUBSCRIPTION_USE_CASES', `Cannot cancel on Paystack: missing email_token for ${subscription.paystack_subscription_code}`);
       }
     }
 
@@ -262,7 +262,7 @@ export class SubscriptionUseCases {
       );
 
       if (!cancelResult.success) {
-        Logger.warn(`Failed to cancel Paystack subscription before refund: ${cancelResult.error}`, 'SUBSCRIPTION_USE_CASES');
+        Logger.warn('SUBSCRIPTION_USE_CASES', `Failed to cancel Paystack subscription before refund: ${cancelResult.error}`);
       }
     }
 
@@ -272,7 +272,7 @@ export class SubscriptionUseCases {
     });
 
     if (!refundResult.success) {
-      Logger.error(`Paystack refund failed: ${refundResult.error}`, 'SUBSCRIPTION_USE_CASES');
+      Logger.error('SUBSCRIPTION_USE_CASES', `Paystack refund failed: ${refundResult.error}`);
       throw new HttpError(HTTP_STATUS.BAD_GATEWAY, 'Failed to process refund with payment provider');
     }
 
@@ -310,7 +310,7 @@ export class SubscriptionUseCases {
       );
 
       if (!cancelResult.success) {
-        Logger.warn(`Failed to cancel current Paystack subscription: ${cancelResult.error}`, 'SUBSCRIPTION_USE_CASES');
+        Logger.warn('SUBSCRIPTION_USE_CASES', `Failed to cancel current Paystack subscription: ${cancelResult.error}`);
       }
     }
 

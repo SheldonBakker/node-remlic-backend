@@ -1,29 +1,33 @@
 import type { Request, Response, NextFunction } from 'express';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
+import { HttpError } from '../../shared/types/errors/appError';
+import type { IErrorResponse } from '../../shared/types/apiResponse';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import Logger from '../../shared/utils/logger';
+
+const CONTEXT = 'ERROR_HANDLER';
 
 export const errorHandler = (
-  err: Error | HttpError,
+  error: Error,
   req: Request,
   res: Response,
   _next: NextFunction,
 ): void => {
-  if (err instanceof HttpError) {
-    ResponseUtil.error(res, err.message, err.statusCode, err.details);
-    return;
-  }
+  const isHttpError = error instanceof HttpError;
 
-  Logger.error('Unexpected error', 'ERROR_HANDLER', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-  });
+  const statusCode = isHttpError ? error.statusCode : HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  const message = isHttpError ? error.message : 'Internal server error';
 
-  ResponseUtil.error(
-    res,
-    process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-    HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  );
+  Logger.error(CONTEXT, `${req.method} ${req.path} - ${message}`, error);
+
+  const errorResponse: IErrorResponse = {
+    success: false,
+    error: {
+      message,
+      statusCode,
+      timestamp: new Date().toISOString(),
+      path: req.path,
+    },
+  };
+
+  res.status(statusCode).json(errorResponse);
 };

@@ -1,5 +1,5 @@
-import cron from 'node-cron';
-import { Logger } from '../shared/utils/logging/logger.js';
+import cron, { type ScheduledTask } from 'node-cron';
+import Logger from '../shared/utils/logger';
 
 export interface ICronJobOptions {
   name: string;
@@ -9,25 +9,25 @@ export interface ICronJobOptions {
 }
 
 export class CronService {
-  private static readonly jobs: Map<string, cron.ScheduledTask> = new Map();
+  private static readonly jobs: Map<string, ScheduledTask> = new Map();
 
   public static register(options: ICronJobOptions): void {
     const { name, schedule, timezone, handler } = options;
 
     if (!cron.validate(schedule)) {
-      Logger.error(`Invalid cron schedule for ${name}: ${schedule}`, 'CRON_SERVICE');
+      Logger.error('CRON_SERVICE', `Invalid cron schedule for ${name}: ${schedule}`);
       return;
     }
 
     if (CronService.jobs.has(name)) {
-      Logger.warn(`Job ${name} already registered`, 'CRON_SERVICE');
+      Logger.warn('CRON_SERVICE', `Job ${name} already registered`);
       return;
     }
 
     const task = cron.schedule(schedule, handler, { timezone });
 
     CronService.jobs.set(name, task);
-    Logger.info(`Job registered: ${name} with schedule: ${schedule}`, 'CRON_SERVICE');
+    Logger.info('CRON_SERVICE', `Job registered: ${name} with schedule: ${schedule}`);
   }
 
   public static stop(name: string): void {
@@ -35,14 +35,14 @@ export class CronService {
     if (task) {
       void task.stop();
       CronService.jobs.delete(name);
-      Logger.info(`Stopped cron job: ${name}`, 'CRON_SERVICE');
+      Logger.info('CRON_SERVICE', `Stopped cron job: ${name}`);
     }
   }
 
   public static stopAll(): void {
     for (const [name, task] of CronService.jobs) {
       void task.stop();
-      Logger.info(`Stopped cron job: ${name}`, 'CRON_SERVICE');
+      Logger.info('CRON_SERVICE', `Stopped cron job: ${name}`);
     }
     CronService.jobs.clear();
   }

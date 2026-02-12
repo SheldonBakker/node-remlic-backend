@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import type { IJobResult, IJobError } from '../types.js';
-import { CronService } from '../cronService.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import RemindersService from '../../infrastructure/database/reminders/remindersMethods.js';
-import { EmailService } from '../../infrastructure/email/emailService.js';
+import type { IJobResult, IJobError } from '../types';
+import { CronService } from '../cronService';
+import Logger from '../../shared/utils/logger';
+import RemindersService from '../../infrastructure/database/reminders/remindersMethods';
+import { EmailService } from '../../infrastructure/email/emailService';
 
 const JOB_NAME = 'license-reminders';
 const SCHEDULE = '0 8 * * *';
@@ -45,7 +45,7 @@ async function run(): Promise<IJobResult> {
         emailsSent += items.length;
       } else {
         errors.push({ recordId: 'batch', message: result.error ?? 'Bulk send failed' });
-        Logger.error(`Failed to send batch: ${result.error}`, JOB_NAME);
+        Logger.error(JOB_NAME, `Failed to send batch: ${result.error}`);
       }
 
       hasMore = nextCursor !== null;
@@ -62,7 +62,7 @@ async function run(): Promise<IJobResult> {
       errors,
     };
   } catch (error) {
-    Logger.error('License reminder job failed', JOB_NAME, { error });
+    Logger.error(JOB_NAME, 'License reminder job failed', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return {
       jobName: JOB_NAME,

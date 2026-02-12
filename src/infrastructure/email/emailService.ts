@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto';
-import { config } from '../config/env.config.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import type { IKlaviyoEventOptions, IEmailResult, IBulkEventItem } from './types.js';
+import { config } from '../config/env.config';
+import Logger from '../../shared/utils/logger';
+import type { IKlaviyoEventOptions, IEmailResult, IBulkEventItem } from './types';
 
 const KLAVIYO_API_BASE = 'https://a.klaviyo.com/api';
 
@@ -46,6 +46,8 @@ interface IKlaviyoErrorResponse {
 }
 
 class EmailService {
+  private static readonly CONTEXT = 'EMAIL_SERVICE';
+
   private static getHeaders(): Record<string, string> {
     return {
       Authorization: `Klaviyo-API-Key ${config.email.apiKey}`,
@@ -101,14 +103,14 @@ class EmailService {
 
       if (!response.ok) {
         const errorMessage = await EmailService.parseErrorResponse(response);
-        Logger.error(`Klaviyo API error: ${errorMessage}`, 'EMAIL_SERVICE');
+        Logger.error(this.CONTEXT, `Klaviyo API error: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to create event: ${errorMessage}`, 'EMAIL_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to create event: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }
@@ -204,14 +206,14 @@ class EmailService {
 
       if (!response.ok) {
         const errorMessage = await EmailService.parseErrorResponse(response);
-        Logger.error(`Bulk API error: ${errorMessage}`, 'EMAIL_SERVICE');
+        Logger.error(this.CONTEXT, `Bulk API error: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to create bulk events: ${errorMessage}`, 'EMAIL_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to create bulk events: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }

@@ -1,12 +1,12 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import { SubscriptionUseCases } from '../../usecases/subscriptionUseCases.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import WebhooksService from '../../infrastructure/database/webhooks/webhooksMethods.js';
-import { PaystackService } from '../../infrastructure/payment/paystackService.js';
-import type { IPaystackWebhookPayload } from '../../infrastructure/payment/types.js';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { HttpError } from '../../shared/types/errors/appError';
+import { SubscriptionUseCases } from '../../usecases/subscriptionUseCases';
+import Logger from '../../shared/utils/logger';
+import WebhooksService from '../../infrastructure/database/webhooks/webhooksMethods';
+import { PaystackService } from '../../infrastructure/payment/paystackService';
+import type { IPaystackWebhookPayload } from '../../infrastructure/payment/types';
 
 export default class WebhooksController {
   private static generateIdempotencyKey(payload: IPaystackWebhookPayload): string {
@@ -34,7 +34,7 @@ export default class WebhooksController {
     const isValid = PaystackService.verifyWebhookSignature(rawBody, signature);
 
     if (!isValid) {
-      Logger.warn('Invalid Paystack webhook signature', 'WEBHOOKS_CONTROLLER');
+      Logger.warn('WEBHOOKS_CONTROLLER', 'Invalid Paystack webhook signature');
       throw new HttpError(HTTP_STATUS.UNAUTHORIZED, 'Invalid webhook signature');
     }
 
@@ -64,18 +64,11 @@ export default class WebhooksController {
           await WebhooksService.markCompleted(webhook.id);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          Logger.error(`Failed to process webhook event: ${errorMessage}`, 'WEBHOOKS_CONTROLLER', {
-            event: payload.event,
-            webhookId: webhook.id,
-          });
+          Logger.error('WEBHOOKS_CONTROLLER', `Failed to process webhook event: ${errorMessage} (webhookId: ${webhook.id})`, error);
           try {
             await WebhooksService.markFailed(webhook.id, errorMessage);
           } catch (markError) {
-            Logger.error(
-              `Failed to mark webhook as failed: ${markError instanceof Error ? markError.message : 'Unknown error'}`,
-              'WEBHOOKS_CONTROLLER',
-              { webhookId: webhook.id },
-            );
+            Logger.error('WEBHOOKS_CONTROLLER', `Failed to mark webhook as failed (webhookId: ${webhook.id})`, markError);
           }
         }
       })();

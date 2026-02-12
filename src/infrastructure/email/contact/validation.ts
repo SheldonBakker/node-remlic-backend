@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import type { IContactForm } from './types.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import type { IContactForm } from './types';
 
 const contactFormSchema = z.object({
   email: z.string().email('Invalid email address'),

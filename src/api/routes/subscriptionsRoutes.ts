@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import SubscriptionsController from '../controllers/subscriptionsController.js';
+import SubscriptionsController from '../controllers/subscriptionsController';
 
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
 
 const router = Router();
 

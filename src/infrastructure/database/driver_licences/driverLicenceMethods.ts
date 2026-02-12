@@ -3,17 +3,19 @@ import type {
   ICreateDriverLicenceData,
   IUpdateDriverLicenceData,
   IDriverLicenceFilters,
-} from './types.js';
-import db from '../drizzleClient.js';
-import { driverLicences } from '../schema/index.js';
+} from './types';
+import db from '../drizzleClient';
+import { driverLicences } from '../schema/index';
 import { eq, or, lt, and, desc, asc, ilike, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class DriverLicenceService {
+  private static readonly CONTEXT = 'DRIVER_LICENCE_SERVICE';
+
   public static async getDriverLicencesByUserId(
     userId: string,
     params: ICursorParams,
@@ -65,7 +67,7 @@ export default class DriverLicenceService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch driver licences', 'DRIVER_LICENCE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch driver licences', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch driver licences');
     }
   }
@@ -78,7 +80,7 @@ export default class DriverLicenceService {
         .where(and(eq(driverLicences.id, licenceId), eq(driverLicences.profile_id, userId)));
 
       if (!data) {
-        Logger.warn('Driver licence not found', 'DRIVER_LICENCE_SERVICE', { licenceId, userId });
+        Logger.warn(this.CONTEXT, `Driver licence not found (licenceId: ${licenceId}, userId: ${userId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Driver licence not found');
       }
 
@@ -87,7 +89,7 @@ export default class DriverLicenceService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch driver licence', 'DRIVER_LICENCE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch driver licence', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch driver licence');
     }
   }
@@ -114,7 +116,7 @@ export default class DriverLicenceService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create driver licence', 'DRIVER_LICENCE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create driver licence', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create driver licence');
     }
   }
@@ -127,7 +129,7 @@ export default class DriverLicenceService {
         .where(and(eq(driverLicences.id, data.id), eq(driverLicences.profile_id, data.profile_id)));
 
       if (!existing) {
-        Logger.warn('Driver licence not found for update', 'DRIVER_LICENCE_SERVICE', { licenceId: data.id, userId: data.profile_id });
+        Logger.warn(this.CONTEXT, `Driver licence not found for update (licenceId: ${data.id}, userId: ${data.profile_id})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Driver licence not found');
       }
 
@@ -148,7 +150,7 @@ export default class DriverLicenceService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to update driver licence', 'DRIVER_LICENCE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update driver licence', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update driver licence');
     }
   }
@@ -161,7 +163,7 @@ export default class DriverLicenceService {
         .where(and(eq(driverLicences.id, licenceId), eq(driverLicences.profile_id, userId)));
 
       if (!existing) {
-        Logger.warn('Driver licence not found for deletion', 'DRIVER_LICENCE_SERVICE', { licenceId, userId });
+        Logger.warn(this.CONTEXT, `Driver licence not found for deletion (licenceId: ${licenceId}, userId: ${userId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Driver licence not found');
       }
 
@@ -172,7 +174,7 @@ export default class DriverLicenceService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete driver licence', 'DRIVER_LICENCE_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete driver licence', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete driver licence');
     }
   }

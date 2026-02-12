@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import VehicleController from '../controllers/vehicleController.js';
+import VehicleController from '../controllers/vehicleController';
 
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
-import { requireRouteSubscription } from '../middleware/subscriptionMiddleware.js';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
+import { requireRouteSubscription } from '../middleware/subscriptionMiddleware';
 
 const requireSubscription = requireRouteSubscription('/vehicle');
 

@@ -1,11 +1,11 @@
-import type { IPsiraApiRequest, IPsiraApiResponse, IPsiraResult, IPsiraOfficer, ICreatePsiraOfficerRequest, IPsiraFilters } from './types.js';
-import db from '../drizzleClient.js';
-import { psiraOfficers } from '../schema/index.js';
+import type { IPsiraApiRequest, IPsiraApiResponse, IPsiraResult, IPsiraOfficer, ICreatePsiraOfficerRequest, IPsiraFilters } from './types';
+import db from '../drizzleClient';
+import { psiraOfficers } from '../schema/index';
 import { eq, or, lt, and, desc, asc, ilike, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
 
 const PSIRA_API_URL = 'https://psiraapi.sortelearn.com/api/SecurityOfficer/Get_ApplicantDetails';
 
@@ -18,6 +18,8 @@ const PSIRA_API_HEADERS = {
 } as const;
 
 export default class PsiraService {
+  private static readonly CONTEXT = 'PSIRA_SERVICE';
+
   private static async fetchFromPsiraApi(
     payload: IPsiraApiRequest,
     logContext: string,
@@ -29,10 +31,7 @@ export default class PsiraService {
     });
 
     if (!response.ok) {
-      Logger.error(`PSIRA API request failed (${logContext})`, 'PSIRA_SERVICE', {
-        status: response.status,
-        statusText: response.statusText,
-      });
+      Logger.error(this.CONTEXT, `PSIRA API request failed (${logContext}) - ${response.status} ${response.statusText}`);
       throw new HttpError(
         HTTP_STATUS.BAD_GATEWAY,
         'Failed to fetch data from PSIRA API',
@@ -72,7 +71,7 @@ export default class PsiraService {
         throw error;
       }
 
-      Logger.error('PSIRA API request error', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'PSIRA API request error', error);
       throw new HttpError(
         HTTP_STATUS.BAD_GATEWAY,
         'Failed to connect to PSIRA API',
@@ -126,7 +125,7 @@ export default class PsiraService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch officers', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'Failed to fetch officers', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch officers');
     }
   }
@@ -163,7 +162,7 @@ export default class PsiraService {
       if (cause?.code === '23505' || (error as Record<string, unknown>).code === '23505') {
         throw new HttpError(HTTP_STATUS.CONFLICT, 'Officer with this ID number already exists');
       }
-      Logger.error('Failed to create officer', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'Failed to create officer', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create officer');
     }
   }
@@ -182,7 +181,7 @@ export default class PsiraService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete officer', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'Failed to delete officer', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete officer');
     }
   }
@@ -200,7 +199,7 @@ export default class PsiraService {
     try {
       return await this.fetchFromPsiraApi(payload, 'SIRA lookup');
     } catch (error) {
-      Logger.error('PSIRA API request error (SIRA lookup)', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'PSIRA API request error (SIRA lookup)', error);
       throw error;
     }
   }
@@ -216,7 +215,7 @@ export default class PsiraService {
 
       return data.map((row) => PsiraService.mapToOfficer(row));
     } catch (error) {
-      Logger.error('Failed to fetch officers for expiry check', 'PSIRA_SERVICE', { error });
+      Logger.error(this.CONTEXT, 'Failed to fetch officers for expiry check', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch officers');
     }
   }
@@ -234,7 +233,7 @@ export default class PsiraService {
         })
         .where(eq(psiraOfficers.id, officerId));
     } catch (error) {
-      Logger.error('Failed to update officer', 'PSIRA_SERVICE', { error, officerId });
+      Logger.error(this.CONTEXT, `Failed to update officer (officerId: ${officerId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update officer');
     }
   }

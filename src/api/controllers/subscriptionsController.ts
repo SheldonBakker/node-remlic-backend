@@ -1,12 +1,12 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods.js';
-import { SubscriptionsValidation } from '../../infrastructure/database/subscriptions/validation.js';
-import { PaginationUtil } from '../../shared/utils/pagination.js';
-import { SubscriptionUseCases } from '../../usecases/subscriptionUseCases.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { HttpError } from '../../shared/types/errors/appError';
+import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods';
+import { SubscriptionsValidation } from '../../infrastructure/database/subscriptions/validation';
+import { PaginationUtil } from '../../shared/utils/pagination';
+import { SubscriptionUseCases } from '../../usecases/subscriptionUseCases';
 
 export default class SubscriptionsController {
   public static getSubscriptions = async (

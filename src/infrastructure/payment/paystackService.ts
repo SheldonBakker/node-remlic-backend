@@ -1,6 +1,6 @@
 import { createHmac } from 'crypto';
-import { config } from '../config/env.config.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
+import { config } from '../config/env.config';
+import Logger from '../../shared/utils/logger';
 import type {
   IPaystackInitializeRequest,
   IPaystackInitializeResponse,
@@ -14,7 +14,7 @@ import type {
   IPaystackTransactionData,
   IPaystackVerifyData,
   IPaystackSubscriptionData,
-} from './types.js';
+} from './types';
 
 interface IPaystackErrorResponse {
   status: boolean;
@@ -22,6 +22,8 @@ interface IPaystackErrorResponse {
 }
 
 class PaystackService {
+  private static readonly CONTEXT = 'PAYSTACK_SERVICE';
+
   private static getHeaders(): Record<string, string> {
     return {
       Authorization: `Bearer ${config.paystack.secretKey}`,
@@ -46,7 +48,7 @@ class PaystackService {
 
       if (!response.ok) {
         const errorMessage = await PaystackService.parseErrorResponse(response);
-        Logger.error(`Paystack initialization error: ${errorMessage}`, 'PAYSTACK_SERVICE');
+        Logger.error(this.CONTEXT, `Paystack initialization error: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
@@ -54,7 +56,7 @@ class PaystackService {
       return { success: true, data: result.data };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to initialize transaction: ${errorMessage}`, 'PAYSTACK_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to initialize transaction: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }
@@ -73,7 +75,7 @@ class PaystackService {
 
       if (!response.ok) {
         const errorMessage = await PaystackService.parseErrorResponse(response);
-        Logger.error(`Paystack verification error: ${errorMessage}`, 'PAYSTACK_SERVICE');
+        Logger.error(this.CONTEXT, `Paystack verification error: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
@@ -81,7 +83,7 @@ class PaystackService {
       return { success: true, data: result.data };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to verify transaction: ${errorMessage}`, 'PAYSTACK_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to verify transaction: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }
@@ -100,7 +102,7 @@ class PaystackService {
 
       if (!response.ok) {
         const errorMessage = await PaystackService.parseErrorResponse(response);
-        Logger.error(`Failed to fetch subscription: ${errorMessage}`, 'PAYSTACK_SERVICE');
+        Logger.error(this.CONTEXT, `Failed to fetch subscription: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
@@ -108,7 +110,7 @@ class PaystackService {
       return { success: true, data: result.data };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to fetch subscription: ${errorMessage}`, 'PAYSTACK_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to fetch subscription: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }
@@ -129,7 +131,7 @@ class PaystackService {
 
       if (!response.ok) {
         const errorMessage = await PaystackService.parseErrorResponse(response);
-        Logger.error(`Failed to disable subscription: ${errorMessage}`, 'PAYSTACK_SERVICE');
+        Logger.error(this.CONTEXT, `Failed to disable subscription: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
@@ -137,7 +139,7 @@ class PaystackService {
       return { success: result.status };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to disable subscription: ${errorMessage}`, 'PAYSTACK_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to disable subscription: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }
@@ -161,7 +163,7 @@ class PaystackService {
 
       if (!response.ok) {
         const errorMessage = await PaystackService.parseErrorResponse(response);
-        Logger.error(`Paystack refund error: ${errorMessage}`, 'PAYSTACK_SERVICE');
+        Logger.error(this.CONTEXT, `Paystack refund error: ${errorMessage}`);
         return { success: false, error: errorMessage };
       }
 
@@ -169,7 +171,7 @@ class PaystackService {
       return { success: true, data: result.data };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      Logger.error(`Failed to create refund: ${errorMessage}`, 'PAYSTACK_SERVICE');
+      Logger.error(this.CONTEXT, `Failed to create refund: ${errorMessage}`);
       return { success: false, error: errorMessage };
     }
   }

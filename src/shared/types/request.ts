@@ -1,6 +1,6 @@
 import type { Request } from 'express';
-import type { UserRole } from '../../api/middleware/authMiddleware.js';
-import type { IUserPermissions } from '../../infrastructure/database/subscriptions/types.js';
+import type { UserRole } from '../../api/middleware/authMiddleware';
+import type { IUserPermissions } from '../../infrastructure/database/subscriptions/types';
 
 export interface IAuthUser {
   id: string;
@@ -12,4 +12,5 @@ export interface IAuthUser {
 
 export interface AuthenticatedRequest extends Request {
   user?: IAuthUser;
+  requestId?: string;
 }

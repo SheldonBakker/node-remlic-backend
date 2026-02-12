@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { IDashboardFilters } from './types.js';
-import { sortOrderSchema, stringBooleanSchema } from '../../../shared/schemas/common.js';
-import { validateOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { IDashboardFilters } from './types';
+import { sortOrderSchema, stringBooleanSchema } from '../../../shared/schemas/common';
+import { validateOrThrow } from '../../../shared/utils/validationHelper';
 
 const dashboardFiltersSchema = z.object({
   record_type: z.enum(['firearms', 'vehicles', 'psira_officers', 'certificates'])

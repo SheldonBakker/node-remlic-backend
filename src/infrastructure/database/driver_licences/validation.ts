@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { dateSchema, createUuidSchema } from '../../../shared/schemas/common.js';
-import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
-import type { ICreateDriverLicenceRequest, IUpdateDriverLicenceRequest, IDriverLicenceFilters } from './types.js';
+import { dateSchema, createUuidSchema } from '../../../shared/schemas/common';
+import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper';
+import type { ICreateDriverLicenceRequest, IUpdateDriverLicenceRequest, IDriverLicenceFilters } from './types';
 
 const surnameSchema = z
   .string()

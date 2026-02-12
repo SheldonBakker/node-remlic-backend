@@ -6,15 +6,15 @@ import type {
   ISubscriptionsFilters,
   IUserPermissions,
   ICreateSubscriptionFromPaystack,
-} from './types.js';
-import db from '../drizzleClient.js';
-import { appSubscriptions, appPackages, appPermissions, profiles } from '../schema/index.js';
+} from './types';
+import db from '../drizzleClient';
+import { appSubscriptions, appPackages, appPermissions, profiles } from '../schema/index';
 import { eq, or, lt, and, desc, lte, gte, inArray, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 interface JoinedSubscriptionRow {
   app_subscriptions: typeof appSubscriptions.$inferSelect;
@@ -23,6 +23,8 @@ interface JoinedSubscriptionRow {
 }
 
 export default class SubscriptionsService {
+  private static readonly CONTEXT = 'SUBSCRIPTIONS_SERVICE';
+
   public static async getSubscriptions(
     params: ICursorParams,
     filters: ISubscriptionsFilters = {},
@@ -67,7 +69,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch subscriptions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch subscriptions', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch subscriptions');
     }
   }
@@ -83,7 +85,7 @@ export default class SubscriptionsService {
         .limit(1);
 
       if (!result) {
-        Logger.warn('Subscription not found', 'SUBSCRIPTIONS_SERVICE', { subscriptionId });
+        Logger.warn(this.CONTEXT, `Subscription not found (subscriptionId: ${subscriptionId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Subscription not found');
       }
 
@@ -92,7 +94,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch subscription', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch subscription');
     }
   }
@@ -133,7 +135,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch user subscriptions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message, userId });
+      Logger.error(this.CONTEXT, `Failed to fetch user subscriptions (userId: ${userId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch subscriptions');
     }
   }
@@ -179,7 +181,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch user permissions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message, userId });
+      Logger.error(this.CONTEXT, `Failed to fetch user permissions (userId: ${userId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch permissions');
     }
   }
@@ -192,7 +194,7 @@ export default class SubscriptionsService {
         .where(eq(profiles.id, data.profile_id));
 
       if (!profileExists) {
-        Logger.warn('Profile not found for subscription creation', 'SUBSCRIPTIONS_SERVICE', { profile_id: data.profile_id });
+        Logger.warn(this.CONTEXT, `Profile not found for subscription creation (profile_id: ${data.profile_id})`);
         throw new HttpError(HTTP_STATUS.BAD_REQUEST, 'Invalid profile ID');
       }
 
@@ -202,7 +204,7 @@ export default class SubscriptionsService {
         .where(and(eq(appPackages.id, data.package_id), eq(appPackages.is_active, true)));
 
       if (!packageExists) {
-        Logger.warn('Package not found or inactive for subscription creation', 'SUBSCRIPTIONS_SERVICE', { package_id: data.package_id });
+        Logger.warn(this.CONTEXT, `Package not found or inactive for subscription creation (package_id: ${data.package_id})`);
         throw new HttpError(HTTP_STATUS.BAD_REQUEST, 'Invalid or inactive package ID');
       }
 
@@ -226,7 +228,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create subscription', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create subscription');
     }
   }
@@ -238,7 +240,7 @@ export default class SubscriptionsService {
       .where(eq(appSubscriptions.id, subscriptionId));
 
     if (!data) {
-      Logger.warn('Subscription not found for update', 'SUBSCRIPTIONS_SERVICE', { subscriptionId });
+      Logger.warn(this.CONTEXT, `Subscription not found for update (subscriptionId: ${subscriptionId})`);
       throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Subscription not found');
     }
 
@@ -252,7 +254,7 @@ export default class SubscriptionsService {
       .where(and(eq(appPackages.id, packageId), eq(appPackages.is_active, true)));
 
     if (!existing) {
-      Logger.warn('Package not found for subscription update', 'SUBSCRIPTIONS_SERVICE', { package_id: packageId });
+      Logger.warn(this.CONTEXT, `Package not found for subscription update (package_id: ${packageId})`);
       throw new HttpError(HTTP_STATUS.BAD_REQUEST, 'Invalid or inactive package ID');
     }
   }
@@ -291,7 +293,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to update subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update subscription', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update subscription');
     }
   }
@@ -304,7 +306,7 @@ export default class SubscriptionsService {
         .where(eq(appSubscriptions.id, subscriptionId));
 
       if (!existing) {
-        Logger.warn('Subscription not found for cancellation', 'SUBSCRIPTIONS_SERVICE', { subscriptionId });
+        Logger.warn(this.CONTEXT, `Subscription not found for cancellation (subscriptionId: ${subscriptionId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Subscription not found');
       }
 
@@ -316,7 +318,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to cancel subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to cancel subscription', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to cancel subscription');
     }
   }
@@ -337,7 +339,7 @@ export default class SubscriptionsService {
 
       return SubscriptionsService.mapToSubWithPkg(result);
     } catch (error) {
-      Logger.error('Failed to fetch subscription by Paystack code', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch subscription by Paystack code', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch subscription');
     }
   }
@@ -372,7 +374,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create subscription from Paystack', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create subscription from Paystack', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create subscription');
     }
   }
@@ -408,7 +410,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to renew subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to renew subscription', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to renew subscription');
     }
   }
@@ -420,7 +422,7 @@ export default class SubscriptionsService {
         .set({ status: 'cancelled' })
         .where(eq(appSubscriptions.paystack_subscription_code, subscriptionCode));
     } catch (error) {
-      Logger.error('Failed to cancel subscription from Paystack', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to cancel subscription from Paystack', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to cancel subscription');
     }
   }
@@ -445,7 +447,7 @@ export default class SubscriptionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to mark subscription as refunded', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to mark subscription as refunded', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to process refund');
     }
   }
@@ -474,7 +476,7 @@ export default class SubscriptionsService {
 
       return SubscriptionsService.mapToSubWithPkg(result);
     } catch (error) {
-      Logger.error('Failed to fetch user active subscription', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message, userId });
+      Logger.error(this.CONTEXT, `Failed to fetch user active subscription (userId: ${userId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch subscription');
     }
   }
@@ -499,7 +501,7 @@ export default class SubscriptionsService {
 
       return new Set(data.map((s) => s.profile_id));
     } catch (error) {
-      Logger.error('Failed to fetch valid subscriptions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch valid subscriptions', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to check subscriptions');
     }
   }
@@ -515,7 +517,7 @@ export default class SubscriptionsService {
 
       return data;
     } catch (error) {
-      Logger.error('Failed to fetch expired active subscriptions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch expired active subscriptions', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch expired subscriptions');
     }
   }
@@ -534,7 +536,7 @@ export default class SubscriptionsService {
 
       return data.length;
     } catch (error) {
-      Logger.error('Failed to bulk expire subscriptions', 'SUBSCRIPTIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to bulk expire subscriptions', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to expire subscriptions');
     }
   }

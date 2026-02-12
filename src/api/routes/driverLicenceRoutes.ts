@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import DriverLicenceController from '../controllers/driverLicenceController.js';
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
-import { requireRouteSubscription } from '../middleware/subscriptionMiddleware.js';
+import DriverLicenceController from '../controllers/driverLicenceController';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
+import { requireRouteSubscription } from '../middleware/subscriptionMiddleware';
 
 const requireSubscription = requireRouteSubscription('/driver-licences');
 

@@ -2,15 +2,17 @@ import type {
   IWebhookEvent,
   ICreateWebhookEventRequest,
   IStoreWebhookResult,
-} from './types.js';
-import db from '../drizzleClient.js';
-import { webhookEvents } from '../schema/index.js';
+} from './types';
+import db from '../drizzleClient';
+import { webhookEvents } from '../schema/index';
 import { eq, and } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
 
 export default class WebhooksService {
+  private static readonly CONTEXT = 'WEBHOOKS_SERVICE';
+
   public static async storeWebhookEvent(
     data: ICreateWebhookEventRequest,
   ): Promise<IStoreWebhookResult> {
@@ -52,9 +54,7 @@ export default class WebhooksService {
           );
 
         if (!existingWebhook) {
-          Logger.error('Failed to fetch existing duplicate webhook', 'WEBHOOKS_SERVICE', {
-            idempotency_key: data.idempotency_key,
-          });
+          Logger.error(this.CONTEXT, `Failed to fetch existing duplicate webhook (idempotency_key: ${data.idempotency_key})`);
           throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to store webhook event');
         }
 
@@ -64,7 +64,7 @@ export default class WebhooksService {
         };
       }
 
-      Logger.error('Failed to store webhook event', 'WEBHOOKS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to store webhook event', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to store webhook event');
     }
   }
@@ -79,10 +79,7 @@ export default class WebhooksService {
         })
         .where(eq(webhookEvents.id, webhookId));
     } catch (error) {
-      Logger.error('Failed to mark webhook as processing', 'WEBHOOKS_SERVICE', {
-        error: (error as Error).message,
-        webhookId,
-      });
+      Logger.error(this.CONTEXT, `Failed to mark webhook as processing (webhookId: ${webhookId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update webhook status');
     }
   }
@@ -98,10 +95,7 @@ export default class WebhooksService {
         })
         .where(eq(webhookEvents.id, webhookId));
     } catch (error) {
-      Logger.error('Failed to mark webhook as completed', 'WEBHOOKS_SERVICE', {
-        error: (error as Error).message,
-        webhookId,
-      });
+      Logger.error(this.CONTEXT, `Failed to mark webhook as completed (webhookId: ${webhookId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update webhook status');
     }
   }
@@ -114,7 +108,7 @@ export default class WebhooksService {
         .where(eq(webhookEvents.id, webhookId));
 
       if (!current) {
-        Logger.error('Failed to fetch webhook for failure update', 'WEBHOOKS_SERVICE', { webhookId });
+        Logger.error(this.CONTEXT, `Failed to fetch webhook for failure update (webhookId: ${webhookId})`);
         throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update webhook status');
       }
 
@@ -130,17 +124,12 @@ export default class WebhooksService {
         })
         .where(eq(webhookEvents.id, webhookId));
 
-      Logger.warn(`Webhook marked as failed: ${webhookId} (retry ${newRetryCount})`, 'WEBHOOKS_SERVICE', {
-        errorMessage,
-      });
+      Logger.warn(this.CONTEXT, `Webhook marked as failed: ${webhookId} (retry ${newRetryCount}, error: ${errorMessage})`);
     } catch (error) {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to mark webhook as failed', 'WEBHOOKS_SERVICE', {
-        error: (error as Error).message,
-        webhookId,
-      });
+      Logger.error(this.CONTEXT, `Failed to mark webhook as failed (webhookId: ${webhookId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update webhook status');
     }
   }
@@ -158,10 +147,7 @@ export default class WebhooksService {
 
       return WebhooksService.mapToWebhookEvent(data);
     } catch (error) {
-      Logger.error('Failed to fetch webhook event', 'WEBHOOKS_SERVICE', {
-        error: (error as Error).message,
-        webhookId,
-      });
+      Logger.error(this.CONTEXT, `Failed to fetch webhook event (webhookId: ${webhookId})`, error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch webhook event');
     }
   }

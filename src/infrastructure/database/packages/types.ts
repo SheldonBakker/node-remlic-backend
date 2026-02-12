@@ -1,4 +1,4 @@
-import type { IPermission } from '../permissions/types.js';
+import type { IPermission } from '../permissions/types';
 
 export type PackageType = 'monthly' | 'yearly';
 

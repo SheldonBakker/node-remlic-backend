@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { IPagination } from '../types/apiResponse.js';
+import type { IPagination } from '../types/apiResponse';
 
 export interface ICursorParams {
   cursor?: string;

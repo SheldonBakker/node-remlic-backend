@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { ICreatePackageRequest, IUpdatePackageRequest, IPackagesFilters } from './types.js';
-import { createUuidSchema, withAtLeastOneField } from '../../../shared/schemas/common.js';
-import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { ICreatePackageRequest, IUpdatePackageRequest, IPackagesFilters } from './types';
+import { createUuidSchema, withAtLeastOneField } from '../../../shared/schemas/common';
+import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper';
 
 const packageTypeEnum = z.enum(['monthly', 'yearly']);
 

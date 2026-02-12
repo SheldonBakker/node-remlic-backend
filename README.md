@@ -1,10 +1,10 @@
 # Remlic Backend
 
-Express.js v5 + TypeScript backend for the Remlic firearms license management system.
+Express v5 + TypeScript backend for the Remlic firearms license management system.
 
 ## Installation
 
-**Prerequisites:** Node.js >= 20.0.0
+**Prerequisites:** Node >= 20.0.0
 
 1. Install dependencies: `npm install`
 2. Configure environment: `cp .env.example .env` and add credentials

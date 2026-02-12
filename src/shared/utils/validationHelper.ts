@@ -1,7 +1,7 @@
 import type { z } from 'zod';
-import { HttpError } from '../types/errors/appError.js';
-import { HTTP_STATUS } from '../constants/httpStatus.js';
-import { formatValidationError } from './validationFormatter.js';
+import { HttpError } from '../types/errors/appError';
+import { HTTP_STATUS } from '../constants/httpStatus';
+import { formatValidationError } from './validationFormatter';
 
 export function validateOrThrow<T extends z.ZodType<unknown, z.ZodTypeDef, unknown>>(
   schema: T,

@@ -1,11 +1,11 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import PackagesService from '../../infrastructure/database/packages/packagesMethods.js';
-import { PackagesValidation } from '../../infrastructure/database/packages/validation.js';
-import { PaginationUtil } from '../../shared/utils/pagination.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { HttpError } from '../../shared/types/errors/appError';
+import PackagesService from '../../infrastructure/database/packages/packagesMethods';
+import { PackagesValidation } from '../../infrastructure/database/packages/validation';
+import { PaginationUtil } from '../../shared/utils/pagination';
 
 export default class PackagesController {
   public static getPackages = async (

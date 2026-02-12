@@ -1,14 +1,16 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import type { IUserPermissions } from '../../infrastructure/database/subscriptions/types.js';
-import type { EntityType } from '../../infrastructure/database/reminders/types.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { ENTITY_TO_PERMISSION } from '../../shared/constants/entities.js';
-import { UserRole } from '../../shared/types/auth.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods.js';
-import { getRouteFeature, type SubscriptionFeature } from './subscriptionRouteConfig.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import type { IUserPermissions } from '../../infrastructure/database/subscriptions/types';
+import type { EntityType } from '../../infrastructure/database/reminders/types';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { ENTITY_TO_PERMISSION } from '../../shared/constants/entities';
+import { UserRole } from '../../shared/types/auth';
+import Logger from '../../shared/utils/logger';
+import { ResponseUtil } from '../../shared/utils/response';
+import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods';
+import { getRouteFeature, type SubscriptionFeature } from './subscriptionRouteConfig';
+
+const CONTEXT = 'SUBSCRIPTION_MIDDLEWARE';
 
 export type { SubscriptionFeature };
 
@@ -49,18 +51,14 @@ export const requireSubscriptionAccess = (...requiredFeatures: SubscriptionFeatu
       const hasAccess = requiredFeatures.some((feature) => permissions[feature]);
 
       if (!hasAccess) {
-        Logger.warn('Subscription access denied', 'SUBSCRIPTION_MIDDLEWARE', {
-          userId: req.user.id,
-          requiredFeatures,
-          userPermissions: permissions,
-        });
+        Logger.warn(CONTEXT, `Subscription access denied (userId: ${req.user.id})`);
         ResponseUtil.error(res, 'Active subscription required to access this resource', HTTP_STATUS.FORBIDDEN);
         return;
       }
 
       next();
     } catch (error) {
-      Logger.error('Subscription check failed', 'SUBSCRIPTION_MIDDLEWARE', { error });
+      Logger.error(CONTEXT, 'Subscription check failed', error);
       ResponseUtil.error(res, 'Failed to verify subscription access', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   };
@@ -92,16 +90,14 @@ export const requireAnySubscription = () => {
       const permissions = await getUserPermissions(req);
 
       if (permissions.active_subscriptions === 0) {
-        Logger.warn('No active subscription', 'SUBSCRIPTION_MIDDLEWARE', {
-          userId: req.user.id,
-        });
+        Logger.warn(CONTEXT, `No active subscription (userId: ${req.user.id})`);
         ResponseUtil.error(res, 'Active subscription required to access this resource', HTTP_STATUS.FORBIDDEN);
         return;
       }
 
       next();
     } catch (error) {
-      Logger.error('Subscription check failed', 'SUBSCRIPTION_MIDDLEWARE', { error });
+      Logger.error(CONTEXT, 'Subscription check failed', error);
       ResponseUtil.error(res, 'Failed to verify subscription access', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   };
@@ -131,11 +127,7 @@ export const requireEntityTypeAccess = () => {
       const requiredFeature = ENTITY_TO_PERMISSION[entityType];
 
       if (!permissions[requiredFeature]) {
-        Logger.warn('Entity type access denied', 'SUBSCRIPTION_MIDDLEWARE', {
-          userId: req.user.id,
-          entityType,
-          requiredFeature,
-        });
+        Logger.warn(CONTEXT, `Entity type access denied (userId: ${req.user.id}, entityType: ${entityType})`);
         ResponseUtil.error(
           res,
           `Active subscription with ${entityType.replace('_', ' ')} access required`,
@@ -146,7 +138,7 @@ export const requireEntityTypeAccess = () => {
 
       next();
     } catch (error) {
-      Logger.error('Entity type access check failed', 'SUBSCRIPTION_MIDDLEWARE', { error });
+      Logger.error(CONTEXT, 'Entity type access check failed', error);
       ResponseUtil.error(res, 'Failed to verify subscription access', HTTP_STATUS.INTERNAL_SERVER_ERROR);
     }
   };

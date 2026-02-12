@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import type { ICreatePsiraOfficerRequest, IPsiraFilters } from './types.js';
-import { createUuidSchema, sortOrderSchema } from '../../../shared/schemas/common.js';
-import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { ICreatePsiraOfficerRequest, IPsiraFilters } from './types';
+import { createUuidSchema, sortOrderSchema } from '../../../shared/schemas/common';
+import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper';
 
 const idNumberSchema = z.string()
   .regex(/^\d{13}$/, 'ID number must be exactly 13 digits');

@@ -1,19 +1,19 @@
 import { Router } from 'express';
-import healthRoutes from './healthRoutes.js';
-import authRoutes from './authRoutes.js';
-import profileRoutes from './profileRoutes.js';
-import firearmsRoutes from './firearmsRoutes.js';
-import psiraRoutes from './psiraRoutes.js';
-import vehicleRoutes from './vehicleRoutes.js';
-import certificatesRoutes from './certificatesRoutes.js';
-import dashboardRoutes from './dashboardRoutes.js';
-import contactRoutes from './contactRoutes.js';
-import remindersRoutes from './remindersRoutes.js';
-import permissionsRoutes from './permissionsRoutes.js';
-import packagesRoutes from './packagesRoutes.js';
-import subscriptionsRoutes from './subscriptionsRoutes.js';
-import webhooksRoutes from './webhooksRoutes.js';
-import driverLicenceRoutes from './driverLicenceRoutes.js';
+import healthRoutes from './healthRoutes';
+import authRoutes from './authRoutes';
+import profileRoutes from './profileRoutes';
+import firearmsRoutes from './firearmsRoutes';
+import psiraRoutes from './psiraRoutes';
+import vehicleRoutes from './vehicleRoutes';
+import certificatesRoutes from './certificatesRoutes';
+import dashboardRoutes from './dashboardRoutes';
+import contactRoutes from './contactRoutes';
+import remindersRoutes from './remindersRoutes';
+import permissionsRoutes from './permissionsRoutes';
+import packagesRoutes from './packagesRoutes';
+import subscriptionsRoutes from './subscriptionsRoutes';
+import webhooksRoutes from './webhooksRoutes';
+import driverLicenceRoutes from './driverLicenceRoutes';
 
 const router = Router();
 

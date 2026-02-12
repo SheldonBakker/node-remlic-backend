@@ -6,13 +6,13 @@ import type {
   IExpiringItem,
   IBatchReminderItem,
   IBatchReminderResult,
-} from './types.js';
-import db from '../drizzleClient.js';
-import { reminderSettings, firearms, vehicles, certificates, psiraOfficers, driverLicences } from '../schema/index.js';
+} from './types';
+import db from '../drizzleClient';
+import { reminderSettings, firearms, vehicles, certificates, psiraOfficers, driverLicences } from '../schema/index';
 import { eq, and, inArray, sql } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
 
 type EntityTable = typeof firearms | typeof vehicles | typeof certificates | typeof psiraOfficers | typeof driverLicences;
 
@@ -25,6 +25,8 @@ const ENTITY_DRIZZLE_TABLE_MAP: Record<EntityType, EntityTable> = {
 };
 
 export default class RemindersService {
+  private static readonly CONTEXT = 'REMINDERS_SERVICE';
+
   public static async getAllSettings(userId: string): Promise<IReminderSettingsResponse> {
     try {
       const data = await db
@@ -50,7 +52,7 @@ export default class RemindersService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch reminder settings', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch reminder settings', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch reminder settings');
     }
   }
@@ -84,7 +86,7 @@ export default class RemindersService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to upsert reminder setting', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to upsert reminder setting', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update reminder setting');
     }
   }
@@ -120,7 +122,7 @@ export default class RemindersService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to bulk upsert reminder settings', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to bulk upsert reminder settings', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update reminder settings');
     }
   }
@@ -133,7 +135,7 @@ export default class RemindersService {
         .where(and(eq(reminderSettings.profile_id, userId), eq(reminderSettings.entity_type, entityType)));
 
       if (!existing) {
-        Logger.warn('Reminder setting not found for deletion', 'REMINDERS_SERVICE', { userId, entityType });
+        Logger.warn(this.CONTEXT, `Reminder setting not found for deletion (entityType: ${entityType})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Reminder setting not found');
       }
 
@@ -144,7 +146,7 @@ export default class RemindersService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete reminder setting', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete reminder setting', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete reminder setting');
     }
   }
@@ -158,7 +160,7 @@ export default class RemindersService {
 
       return data.map((row) => RemindersService.mapToSetting(row));
     } catch (error) {
-      Logger.error('Failed to fetch all enabled reminder settings', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch all enabled reminder settings', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch reminder settings');
     }
   }
@@ -202,7 +204,7 @@ export default class RemindersService {
         };
       });
     } catch (error) {
-      Logger.error(`Failed to fetch expiring ${entityType}`, 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, `Failed to fetch expiring ${entityType}`, error);
       return [];
     }
   }
@@ -291,7 +293,7 @@ export default class RemindersService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch expiring reminders batch', 'REMINDERS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch expiring reminders batch', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch reminders');
     }
   }

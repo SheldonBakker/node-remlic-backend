@@ -5,9 +5,9 @@ import type {
   ISubscriptionsFilters,
   IInitializeSubscriptionRequest,
   IChangePlanRequest,
-} from './types.js';
-import { dateSchema, createUuidSchema, withAtLeastOneField } from '../../../shared/schemas/common.js';
-import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper.js';
+} from './types';
+import { dateSchema, createUuidSchema, withAtLeastOneField } from '../../../shared/schemas/common';
+import { validateOrThrow, validateIdOrThrow } from '../../../shared/utils/validationHelper';
 
 const subscriptionStatusEnum = z.enum(['active', 'expired', 'cancelled', 'refunded']);
 

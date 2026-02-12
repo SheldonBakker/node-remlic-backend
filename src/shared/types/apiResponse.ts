@@ -18,6 +18,16 @@ export interface IApiErrorResponse {
   statusCode: number;
 }
 
+export interface IErrorResponse {
+  success: false;
+  error: {
+    message: string;
+    statusCode: number;
+    timestamp: string;
+    path: string;
+  };
+}
+
 export interface IPageResult<T> {
   data: T[];
   nextCursor: IPagination['nextCursor'];

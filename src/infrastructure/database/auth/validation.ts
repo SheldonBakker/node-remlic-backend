@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import type { ISignupRequest } from './types.js';
-import { validateOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { ISignupRequest } from './types';
+import { validateOrThrow } from '../../../shared/utils/validationHelper';
 
 const signupSchema = z.object({
   email: z.string()

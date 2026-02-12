@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import PermissionsController from '../controllers/permissionsController.js';
+import PermissionsController from '../controllers/permissionsController';
 
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
 
 const router = Router();
 

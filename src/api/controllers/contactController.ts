@@ -1,8 +1,8 @@
 import type { Request, Response, NextFunction } from 'express';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { ContactValidation } from '../../infrastructure/email/contact/validation.js';
-import ContactService from '../../infrastructure/email/contact/contactMethods.js';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { ContactValidation } from '../../infrastructure/email/contact/validation';
+import ContactService from '../../infrastructure/email/contact/contactMethods';
 
 export default class ContactController {
   public static sendContactForm = async (

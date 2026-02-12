@@ -1,14 +1,16 @@
-import type { IPackage, IPackageWithPermission, ICreatePackageRequest, IUpdatePackageRequest, IPackagesFilters } from './types.js';
-import db from '../drizzleClient.js';
-import { appPackages, appPermissions } from '../schema/index.js';
+import type { IPackage, IPackageWithPermission, ICreatePackageRequest, IUpdatePackageRequest, IPackagesFilters } from './types';
+import db from '../drizzleClient';
+import { appPackages, appPermissions } from '../schema/index';
 import { eq, or, lt, and, desc, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class PackagesService {
+  private static readonly CONTEXT = 'PACKAGES_SERVICE';
+
   public static async getPackages(
     params: ICursorParams,
     filters: IPackagesFilters = {},
@@ -51,7 +53,7 @@ export default class PackagesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch packages', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch packages', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch packages');
     }
   }
@@ -64,7 +66,7 @@ export default class PackagesService {
       });
 
       if (!result) {
-        Logger.warn('Package not found', 'PACKAGES_SERVICE', { packageId });
+        Logger.warn(this.CONTEXT, `Package not found (packageId: ${packageId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Package not found');
       }
 
@@ -73,7 +75,7 @@ export default class PackagesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch package', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch package', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch package');
     }
   }
@@ -86,7 +88,7 @@ export default class PackagesService {
       });
 
       if (!result) {
-        Logger.warn('Package not found by slug', 'PACKAGES_SERVICE', { slug });
+        Logger.warn(this.CONTEXT, `Package not found by slug (slug: ${slug})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Package not found');
       }
 
@@ -95,7 +97,7 @@ export default class PackagesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch package by slug', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch package by slug', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch package');
     }
   }
@@ -108,7 +110,7 @@ export default class PackagesService {
       });
 
       if (!result) {
-        Logger.warn('Package not found by Paystack plan code', 'PACKAGES_SERVICE', { planCode });
+        Logger.warn(this.CONTEXT, `Package not found by Paystack plan code (planCode: ${planCode})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Package not found');
       }
 
@@ -117,7 +119,7 @@ export default class PackagesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch package by plan code', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch package by plan code', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch package');
     }
   }
@@ -130,7 +132,7 @@ export default class PackagesService {
         .where(eq(appPermissions.id, data.permission_id));
 
       if (!permExists) {
-        Logger.warn('Permission not found for package creation', 'PACKAGES_SERVICE', { permission_id: data.permission_id });
+        Logger.warn(this.CONTEXT, `Permission not found for package creation (permission_id: ${data.permission_id})`);
         throw new HttpError(HTTP_STATUS.BAD_REQUEST, 'Invalid permission ID');
       }
 
@@ -156,10 +158,10 @@ export default class PackagesService {
       }
       const cause = (error as Record<string, unknown>).cause as Record<string, unknown> | undefined;
       if (cause?.code === '23505' || (error as Record<string, unknown>).code === '23505') {
-        Logger.warn('Package slug already exists', 'PACKAGES_SERVICE', { slug: data.slug });
+        Logger.warn(this.CONTEXT, `Package slug already exists (slug: ${data.slug})`);
         throw new HttpError(HTTP_STATUS.CONFLICT, 'Package with this slug already exists');
       }
-      Logger.error('Failed to create package', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create package', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create package');
     }
   }
@@ -171,7 +173,7 @@ export default class PackagesService {
       .where(eq(appPackages.id, packageId));
 
     if (!existing) {
-      Logger.warn('Package not found for update', 'PACKAGES_SERVICE', { packageId });
+      Logger.warn(this.CONTEXT, `Package not found for update (packageId: ${packageId})`);
       throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Package not found');
     }
   }
@@ -183,7 +185,7 @@ export default class PackagesService {
       .where(eq(appPermissions.id, permissionId));
 
     if (!existing) {
-      Logger.warn('Permission not found for package update', 'PACKAGES_SERVICE', { permission_id: permissionId });
+      Logger.warn(this.CONTEXT, `Permission not found for package update (permission_id: ${permissionId})`);
       throw new HttpError(HTTP_STATUS.BAD_REQUEST, 'Invalid permission ID');
     }
   }
@@ -218,10 +220,10 @@ export default class PackagesService {
       }
       const cause = (error as Record<string, unknown>).cause as Record<string, unknown> | undefined;
       if (cause?.code === '23505' || (error as Record<string, unknown>).code === '23505') {
-        Logger.warn('Package slug already exists', 'PACKAGES_SERVICE', { slug: data.slug });
+        Logger.warn(this.CONTEXT, `Package slug already exists (slug: ${data.slug})`);
         throw new HttpError(HTTP_STATUS.CONFLICT, 'Package with this slug already exists');
       }
-      Logger.error('Failed to update package', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update package', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update package');
     }
   }
@@ -234,7 +236,7 @@ export default class PackagesService {
         .where(eq(appPackages.id, packageId));
 
       if (!existing) {
-        Logger.warn('Package not found for deletion', 'PACKAGES_SERVICE', { packageId });
+        Logger.warn(this.CONTEXT, `Package not found for deletion (packageId: ${packageId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Package not found');
       }
 
@@ -246,7 +248,7 @@ export default class PackagesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to deactivate package', 'PACKAGES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to deactivate package', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to deactivate package');
     }
   }

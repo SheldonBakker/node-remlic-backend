@@ -1,12 +1,14 @@
-import type { IDashboardExpiringRecord, IDashboardFilters } from './types.js';
-import db from '../drizzleClient.js';
+import type { IDashboardExpiringRecord, IDashboardFilters } from './types';
+import db from '../drizzleClient';
 import { sql } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
 
 export default class DashboardService {
+  private static readonly CONTEXT = 'DASHBOARD_SERVICE';
+
   public static async getUpcomingExpiries(
     userId: string,
     params: ICursorParams,
@@ -53,9 +55,7 @@ export default class DashboardService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch dashboard expiring records', 'DASHBOARD_SERVICE', {
-        error: (error as Error).message,
-      });
+      Logger.error(this.CONTEXT, 'Failed to fetch dashboard expiring records', error);
       throw new HttpError(
         HTTP_STATUS.INTERNAL_SERVER_ERROR,
         'Failed to fetch dashboard data',

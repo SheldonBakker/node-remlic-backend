@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import FirearmsController from '../controllers/firearmsController.js';
-import { requireRole, UserRole } from '../middleware/authMiddleware.js';
-import { requireRouteSubscription } from '../middleware/subscriptionMiddleware.js';
+import FirearmsController from '../controllers/firearmsController';
+import { requireRole, UserRole } from '../middleware/authMiddleware';
+import { requireRouteSubscription } from '../middleware/subscriptionMiddleware';
 
 const requireSubscription = requireRouteSubscription('/firearms');
 

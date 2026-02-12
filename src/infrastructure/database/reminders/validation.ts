@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import type { EntityType, IUpdateReminderSettingRequest, IBulkUpdateReminderSettingsRequest } from './types.js';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { withAtLeastOneField } from '../../../shared/schemas/common.js';
-import { validateOrThrow } from '../../../shared/utils/validationHelper.js';
+import type { EntityType, IUpdateReminderSettingRequest, IBulkUpdateReminderSettingsRequest } from './types';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import { withAtLeastOneField } from '../../../shared/schemas/common';
+import { validateOrThrow } from '../../../shared/utils/validationHelper';
 
 const entityTypeSchema = z.enum(['firearms', 'vehicles', 'certificates', 'psira_officers']);
 

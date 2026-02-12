@@ -1,7 +1,7 @@
-import type { IJobResult } from '../types.js';
-import { CronService } from '../cronService.js';
-import { Logger } from '../../shared/utils/logging/logger.js';
-import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods.js';
+import type { IJobResult } from '../types';
+import { CronService } from '../cronService';
+import Logger from '../../shared/utils/logger';
+import SubscriptionsService from '../../infrastructure/database/subscriptions/subscriptionsMethods';
 
 const JOB_NAME = 'subscription-expiry';
 const SCHEDULE = '0 0 * * *';
@@ -39,7 +39,7 @@ async function run(): Promise<IJobResult> {
       errors: [],
     };
   } catch (error) {
-    Logger.error('Subscription expiry job failed', JOB_NAME, { error });
+    Logger.error(JOB_NAME, 'Subscription expiry job failed', error);
     const message = error instanceof Error ? error.message : 'Unknown error';
     return {
       jobName: JOB_NAME,

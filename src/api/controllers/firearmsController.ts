@@ -1,11 +1,11 @@
 import type { Response, NextFunction } from 'express';
-import type { AuthenticatedRequest } from '../../shared/types/request.js';
-import { ResponseUtil } from '../../shared/utils/response.js';
-import { HTTP_STATUS } from '../../shared/constants/httpStatus.js';
-import { HttpError } from '../../shared/types/errors/appError.js';
-import FirearmsService from '../../infrastructure/database/firearms/firearmsMethods.js';
-import { FirearmsValidation } from '../../infrastructure/database/firearms/validation.js';
-import { PaginationUtil } from '../../shared/utils/pagination.js';
+import type { AuthenticatedRequest } from '../../shared/types/request';
+import { ResponseUtil } from '../../shared/utils/response';
+import { HTTP_STATUS } from '../../shared/constants/httpStatus';
+import { HttpError } from '../../shared/types/errors/appError';
+import FirearmsService from '../../infrastructure/database/firearms/firearmsMethods';
+import { FirearmsValidation } from '../../infrastructure/database/firearms/validation';
+import { PaginationUtil } from '../../shared/utils/pagination';
 
 export default class FirearmsController {
   public static getFirearms = async (

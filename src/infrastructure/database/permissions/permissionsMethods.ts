@@ -1,14 +1,16 @@
-import type { IPermission, ICreatePermissionRequest, IUpdatePermissionRequest } from './types.js';
-import db from '../drizzleClient.js';
-import { appPermissions } from '../schema/index.js';
+import type { IPermission, ICreatePermissionRequest, IUpdatePermissionRequest } from './types';
+import db from '../drizzleClient';
+import { appPermissions } from '../schema/index';
 import { eq, or, lt, and, desc } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class PermissionsService {
+  private static readonly CONTEXT = 'PERMISSIONS_SERVICE';
+
   public static async getPermissions(
     params: ICursorParams,
   ): Promise<IPaginatedResult<IPermission>> {
@@ -40,7 +42,7 @@ export default class PermissionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch permissions', 'PERMISSIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch permissions', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch permissions');
     }
   }
@@ -53,7 +55,7 @@ export default class PermissionsService {
         .where(eq(appPermissions.id, permissionId));
 
       if (!data) {
-        Logger.warn('Permission not found', 'PERMISSIONS_SERVICE', { permissionId });
+        Logger.warn(this.CONTEXT, `Permission not found (permissionId: ${permissionId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Permission not found');
       }
 
@@ -62,7 +64,7 @@ export default class PermissionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch permission', 'PERMISSIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch permission', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch permission');
     }
   }
@@ -90,7 +92,7 @@ export default class PermissionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create permission', 'PERMISSIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create permission', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create permission');
     }
   }
@@ -106,7 +108,7 @@ export default class PermissionsService {
         .where(eq(appPermissions.id, permissionId));
 
       if (!existing) {
-        Logger.warn('Permission not found for update', 'PERMISSIONS_SERVICE', { permissionId });
+        Logger.warn(this.CONTEXT, `Permission not found for update (permissionId: ${permissionId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Permission not found');
       }
 
@@ -127,7 +129,7 @@ export default class PermissionsService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to update permission', 'PERMISSIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update permission', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update permission');
     }
   }
@@ -140,7 +142,7 @@ export default class PermissionsService {
         .where(eq(appPermissions.id, permissionId));
 
       if (!existing) {
-        Logger.warn('Permission not found for deletion', 'PERMISSIONS_SERVICE', { permissionId });
+        Logger.warn(this.CONTEXT, `Permission not found for deletion (permissionId: ${permissionId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Permission not found');
       }
 
@@ -153,10 +155,10 @@ export default class PermissionsService {
       }
       const cause = (error as Record<string, unknown>).cause as Record<string, unknown> | undefined;
       if (cause?.code === '23503' || (error as Record<string, unknown>).code === '23503') {
-        Logger.warn('Cannot delete permission with linked packages', 'PERMISSIONS_SERVICE', { permissionId });
+        Logger.warn(this.CONTEXT, `Cannot delete permission with linked packages (permissionId: ${permissionId})`);
         throw new HttpError(HTTP_STATUS.CONFLICT, 'Cannot delete permission that is linked to packages');
       }
-      Logger.error('Failed to delete permission', 'PERMISSIONS_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete permission', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete permission');
     }
   }

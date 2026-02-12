@@ -1,14 +1,16 @@
-import type { ICertificate, ICreateCertificateData, IUpdateCertificateData, ICertificatesFilters } from './types.js';
-import db from '../drizzleClient.js';
-import { certificates } from '../schema/index.js';
+import type { ICertificate, ICreateCertificateData, IUpdateCertificateData, ICertificatesFilters } from './types';
+import db from '../drizzleClient';
+import { certificates } from '../schema/index';
 import { eq, or, lt, and, desc, asc, ilike, type SQL } from 'drizzle-orm';
-import { HttpError } from '../../../shared/types/errors/appError.js';
-import { HTTP_STATUS } from '../../../shared/constants/httpStatus.js';
-import { Logger } from '../../../shared/utils/logging/logger.js';
-import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination.js';
-import { buildPartialUpdate } from '../../../shared/utils/updateBuilder.js';
+import { HttpError } from '../../../shared/types/errors/appError';
+import { HTTP_STATUS } from '../../../shared/constants/httpStatus';
+import Logger from '../../../shared/utils/logger';
+import { PaginationUtil, type ICursorParams, type IPaginatedResult } from '../../../shared/utils/pagination';
+import { buildPartialUpdate } from '../../../shared/utils/updateBuilder';
 
 export default class CertificatesService {
+  private static readonly CONTEXT = 'CERTIFICATES_SERVICE';
+
   public static async getCertificatesByUserId(
     userId: string,
     params: ICursorParams,
@@ -55,7 +57,7 @@ export default class CertificatesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch certificates', 'CERTIFICATES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch certificates', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch certificates');
     }
   }
@@ -68,7 +70,7 @@ export default class CertificatesService {
         .where(and(eq(certificates.id, certificateId), eq(certificates.profile_id, userId)));
 
       if (!data) {
-        Logger.warn('Certificate not found', 'CERTIFICATES_SERVICE', { certificateId, userId });
+        Logger.warn(this.CONTEXT, `Certificate not found (certificateId: ${certificateId}, userId: ${userId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Certificate not found');
       }
 
@@ -77,7 +79,7 @@ export default class CertificatesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to fetch certificate', 'CERTIFICATES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to fetch certificate', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to fetch certificate');
     }
   }
@@ -105,7 +107,7 @@ export default class CertificatesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to create certificate', 'CERTIFICATES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to create certificate', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to create certificate');
     }
   }
@@ -118,7 +120,7 @@ export default class CertificatesService {
         .where(and(eq(certificates.id, data.id), eq(certificates.profile_id, data.profile_id)));
 
       if (!existing) {
-        Logger.warn('Certificate not found for update', 'CERTIFICATES_SERVICE', { certificateId: data.id, userId: data.profile_id });
+        Logger.warn(this.CONTEXT, `Certificate not found for update (certificateId: ${data.id}, userId: ${data.profile_id})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Certificate not found');
       }
 
@@ -139,7 +141,7 @@ export default class CertificatesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to update certificate', 'CERTIFICATES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to update certificate', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to update certificate');
     }
   }
@@ -152,7 +154,7 @@ export default class CertificatesService {
         .where(and(eq(certificates.id, certificateId), eq(certificates.profile_id, userId)));
 
       if (!existing) {
-        Logger.warn('Certificate not found for deletion', 'CERTIFICATES_SERVICE', { certificateId, userId });
+        Logger.warn(this.CONTEXT, `Certificate not found for deletion (certificateId: ${certificateId}, userId: ${userId})`);
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Certificate not found');
       }
 
@@ -163,7 +165,7 @@ export default class CertificatesService {
       if (error instanceof HttpError) {
         throw error;
       }
-      Logger.error('Failed to delete certificate', 'CERTIFICATES_SERVICE', { error: (error as Error).message });
+      Logger.error(this.CONTEXT, 'Failed to delete certificate', error);
       throw new HttpError(HTTP_STATUS.INTERNAL_SERVER_ERROR, 'Failed to delete certificate');
     }
   }
