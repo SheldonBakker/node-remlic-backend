@@ -104,6 +104,12 @@ export default class DriverLicenceService {
           initials: data.initials,
           id_number: data.id_number,
           expiry_date: data.expiry_date,
+          licence_number: data.licence_number,
+          licence_codes: data.licence_codes,
+          issue_date: data.issue_date,
+          date_of_birth: data.date_of_birth,
+          gender: data.gender,
+          decoded_data: data.decoded_data,
         })
         .returning();
 
@@ -133,7 +139,18 @@ export default class DriverLicenceService {
         throw new HttpError(HTTP_STATUS.NOT_FOUND, 'Driver licence not found');
       }
 
-      const updateData = buildPartialUpdate(data, ['surname', 'initials', 'id_number', 'expiry_date']);
+      const updateData = buildPartialUpdate(data, [
+        'surname',
+        'initials',
+        'id_number',
+        'expiry_date',
+        'licence_number',
+        'licence_codes',
+        'issue_date',
+        'date_of_birth',
+        'gender',
+        'decoded_data',
+      ]);
 
       const [licence] = await db
         .update(driverLicences)
@@ -192,6 +209,7 @@ export default class DriverLicenceService {
       issue_date: row.issue_date,
       date_of_birth: row.date_of_birth,
       gender: row.gender,
+      decoded_data: row.decoded_data,
       created_at: row.created_at.toISOString(),
       updated_at: row.updated_at.toISOString(),
     };

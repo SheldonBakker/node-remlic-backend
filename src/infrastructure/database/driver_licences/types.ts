@@ -12,6 +12,7 @@ export interface IDriverLicence {
   issue_date?: string | null;
   date_of_birth?: string | null;
   gender?: string | null;
+  decoded_data?: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

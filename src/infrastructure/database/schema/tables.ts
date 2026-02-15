@@ -68,10 +68,11 @@ export const driverLicences = pgTable('driver_licences', {
   id_number: text('id_number').notNull(),
   expiry_date: date('expiry_date').notNull(),
   licence_number: text('licence_number'),
-  licence_codes: jsonb('licence_codes').$type<string[]>(),
+  licence_codes: text('licence_codes').array(),
   issue_date: date('issue_date'),
   date_of_birth: date('date_of_birth'),
   gender: text('gender'),
+  decoded_data: jsonb('decoded_data').$type<Record<string, unknown>>(),
   created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 });
