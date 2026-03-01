@@ -131,6 +131,16 @@ export const reminderSettings = pgTable('reminder_settings', {
   uniqueIndex('reminder_settings_profile_entity_unique').on(table.profile_id, table.entity_type),
 ]);
 
+export const deviceTokens = pgTable('device_tokens', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  profile_id: uuid('profile_id').notNull().references(() => profiles.id),
+  player_id: text('player_id').notNull(),
+  created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  uniqueIndex('device_tokens_profile_player_unique').on(table.profile_id, table.player_id),
+]);
+
 export const webhookEvents = pgTable('webhook_events', {
   id: uuid('id').primaryKey().defaultRandom(),
   provider: text('provider').notNull(),

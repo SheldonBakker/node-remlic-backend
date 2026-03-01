@@ -10,6 +10,7 @@ import {
   appPackages,
   appSubscriptions,
   reminderSettings,
+  deviceTokens,
 } from './tables';
 
 export const profilesRelations = relations(profiles, ({ many }) => ({
@@ -20,6 +21,7 @@ export const profilesRelations = relations(profiles, ({ many }) => ({
   driverLicences: many(driverLicences),
   appSubscriptions: many(appSubscriptions),
   reminderSettings: many(reminderSettings),
+  deviceTokens: many(deviceTokens),
 }));
 
 export const firearmsRelations = relations(firearms, ({ one }) => ({
@@ -83,6 +85,13 @@ export const appSubscriptionsRelations = relations(appSubscriptions, ({ one }) =
 export const reminderSettingsRelations = relations(reminderSettings, ({ one }) => ({
   profile: one(profiles, {
     fields: [reminderSettings.profile_id],
+    references: [profiles.id],
+  }),
+}));
+
+export const deviceTokensRelations = relations(deviceTokens, ({ one }) => ({
+  profile: one(profiles, {
+    fields: [deviceTokens.profile_id],
     references: [profiles.id],
   }),
 }));

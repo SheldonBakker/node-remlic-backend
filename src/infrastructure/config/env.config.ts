@@ -30,6 +30,10 @@ export interface IConfig {
     v2Pk128: string;
     v2Pk74: string;
   };
+  onesignal: {
+    appId: string;
+    restApiKey: string;
+  };
 }
 
 class ConfigService {
@@ -68,6 +72,10 @@ class ConfigService {
         v1Pk74: process.env.RSA_V1_PK_74 ?? '',
         v2Pk128: process.env.RSA_V2_PK_128 ?? '',
         v2Pk74: process.env.RSA_V2_PK_74 ?? '',
+      },
+      onesignal: {
+        appId: process.env.ONESIGNAL_APP_ID ?? '',
+        restApiKey: process.env.ONESIGNAL_REST_API_KEY ?? '',
       },
     };
   }

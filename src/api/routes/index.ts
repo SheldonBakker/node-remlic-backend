@@ -15,6 +15,7 @@ import subscriptionsRoutes from './subscriptionsRoutes';
 import webhooksRoutes from './webhooksRoutes';
 import driverLicenceRoutes from './driverLicenceRoutes';
 import decryptRoutes from './decryptRoutes';
+import deviceTokensRoutes from './deviceTokensRoutes';
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.use('/packages', packagesRoutes);
 router.use('/subscriptions', subscriptionsRoutes);
 router.use('/webhooks', webhooksRoutes);
 router.use('/decrypt', decryptRoutes);
+router.use('/device-tokens', deviceTokensRoutes);
 
 export default router;

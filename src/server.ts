@@ -14,6 +14,7 @@ import routes from './api/routes/index';
 import { CronService } from './jobs/cronService';
 import { registerPsiraUpdateJob } from './jobs/psira/psiraUpdateJob';
 import { registerReminderJob } from './jobs/reminders/reminderJob';
+import { registerPushReminderJob } from './jobs/reminders/pushReminderJob';
 import { registerSubscriptionExpiryJob } from './jobs/subscriptions/subscriptionExpiryJob';
 
 const app = express();
@@ -52,6 +53,8 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
+app.set('trust proxy', 1);
+
 app.use(cors(corsOptions));
 
 app.use(helmet());
@@ -86,6 +89,7 @@ app.listen(port, () => {
   Logger.info('Server', `Environment: ${config.app.nodeEnv}`);
   registerPsiraUpdateJob();
   registerReminderJob();
+  registerPushReminderJob();
   registerSubscriptionExpiryJob();
 });
 
